@@ -15,6 +15,7 @@
 <style>
 	.top-nav{
 	  position: fixed;
+		display: flex;
 		top: 0;
 		right: 0;
 		left: 0;

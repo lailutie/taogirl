@@ -37,12 +37,12 @@
 	import TodayHot from './childcomps/TodayHot.vue'
 	import TabControl from 'components/contens/tabcontrol/TabControl.vue'
 	import GoodsList from 'components/contens/goods/GoodsList.vue'
-	import BackTop from 'components/contens/backtop/BackTop.vue'
 	
 	import Scroll from "components/common/scroll/Scroll.vue"
 	
 	import {getHomeMultiData, getHomeGoods} from "network/home.js"
 	import {debounce} from "common/utils.js"
+	import {imgListenerMixin, backTopMixin} from "common/mixin.js"
 	
 	export default {
 		name: "Home",
@@ -53,7 +53,6 @@
 			TodayHot,
 			TabControl,
 			GoodsList,
-			BackTop,
 			Scroll
 		},
 		data() {
@@ -66,12 +65,12 @@
 					'sell': {page: 0, list: []}
 				},
 				tabGoodsOrder: "pop",
-				showContentBackTop: false,
 				tabOffSetTop: 0,
 				istabcontrolshow: false,
-				saveY: 0
+				saveY: 0,
 		  }
 		},
+		mixins: [imgListenerMixin, backTopMixin],
 		created() {
 		  //1.请求多个数据
 			this.getHomeMultiData()
@@ -82,13 +81,10 @@
 			
 		},
 		mounted() {
-			//监听图片加载完成，然后刷新
-			const refresh = debounce(this.$refs.scroll.refresh, 100)
-			this.$bus.$on("itemImgLoad", () => {
-				// console.log("123123123")
-				// this.$refs.scroll.refresh()
-				refresh()
-			})
+			// 监听图片加载完成，然后刷新  --> minin.js
+			// const refresh = debounce(this.$refs.scroll.refresh, 100)
+			// this.itemImgListener = () => { refresh() }
+			// this.$bus.$on("itemImgLoad", this.itemImgListener)
 		},
 		methods: {
 			/* 
@@ -96,7 +92,10 @@
 			 */
 			contentScroll(position) {
 				// console.log(position)
+				// 1、可以不写到mixin里面
 				this.showContentBackTop = (-position.y) > 1000
+				// 2、写道minin里面后调用
+				// this.listenShowBackTop(position)
 				
 				//决定tabcontrol吸顶
 				this.istabcontrolshow = (-position.y) > this.tabOffSetTop
@@ -105,13 +104,6 @@
 			loadMore() {
 				// console.log("load more")
 				this.getHomeGoods(this.tabGoodsOrder)
-			},
-			/* 
-			 返回顶部操作
-			 */
-			backTopClick() {
-				// console.log("en")
-				this.$refs.scroll.scrollTo(0, 0, 500)
 			},
 			swiperImageLoader() {
 				this.tabOffSetTop = this.$refs.tabControl0.$el.offsetTop
@@ -125,6 +117,9 @@
 			},
 			decativated() {
 				this.saveY = this.$refs.scroll.getScrollY()
+				
+				//取消全局事件的监听
+				this.$bus.$off("itemImgLoad", this.itemImgListener)
 			},
 			// 网络请求
 			getHomeMultiData() {

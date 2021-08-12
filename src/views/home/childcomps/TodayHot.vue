@@ -1,6 +1,6 @@
 <template>
 	<div class="today-hot">
-		<a href="https://www.baidu.com">
+		<a href="https://blog.lailutie.com">
 			<img src="~assets/img/home/recommend_bg.jpg" >
 		</a>
 	</div>
